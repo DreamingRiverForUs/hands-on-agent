@@ -10,11 +10,21 @@
 ]{geometry}
 
 \usepackage{fontspec}
-\setmainfont{texgyrepagella-regular.otf}[
-  BoldFont=texgyrepagella-bold.otf,
-  ItalicFont=texgyrepagella-italic.otf,
-  BoldItalicFont=texgyrepagella-bolditalic.otf
-]
+\IfFileExists{font/times.ttf}{
+  \setmainfont{times.ttf}[
+    Path=font/,
+    BoldFont=timesbd.ttf,
+    ItalicFont=timesi.ttf,
+    BoldItalicFont=timesbi.ttf
+  ]
+}{
+  \setmainfont{texgyrepagella-regular.otf}[
+    BoldFont=texgyrepagella-bold.otf,
+    ItalicFont=texgyrepagella-italic.otf,
+    BoldItalicFont=texgyrepagella-bolditalic.otf
+  ]
+}
+
 \setsansfont{texgyreheros-regular.otf}[
   BoldFont=texgyreheros-bold.otf,
   ItalicFont=texgyreheros-italic.otf,
@@ -25,14 +35,33 @@
   ItalicFont=texgyrecursor-italic.otf,
   BoldItalicFont=texgyrecursor-bolditalic.otf
 ]
-\setCJKmainfont{FandolSong-Regular.otf}[
-  BoldFont=FandolSong-Bold.otf,
-  ItalicFont=FandolKai-Regular.otf
-]
-\setCJKsansfont{FandolHei-Regular.otf}[
-  BoldFont=FandolHei-Bold.otf
-]
-\setCJKmonofont{FandolFang-Regular.otf}
+
+\IfFileExists{font/simsun.ttc}{
+  \setCJKmainfont{simsun.ttc}[
+    Path=font/,
+    FontIndex=0,
+    BoldFont=simhei.ttf,
+    ItalicFont=simkai.ttf,
+    BoldItalicFont=simhei.ttf
+  ]
+  \setCJKsansfont{simhei.ttf}[
+    Path=font/,
+    BoldFont=simhei.ttf
+  ]
+  \setCJKmonofont{simsun.ttc}[
+    Path=font/,
+    FontIndex=1
+  ]
+}{
+  \setCJKmainfont{FandolSong-Regular.otf}[
+    BoldFont=FandolSong-Bold.otf,
+    ItalicFont=FandolKai-Regular.otf
+  ]
+  \setCJKsansfont{FandolHei-Regular.otf}[
+    BoldFont=FandolHei-Bold.otf
+  ]
+  \setCJKmonofont{FandolFang-Regular.otf}
+}
 
 \usepackage{xcolor}
 \definecolor{AgentInk}{HTML}{1D2730}

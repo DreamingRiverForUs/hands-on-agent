@@ -17,6 +17,10 @@
 __pycache__/
 *.py[cod]
 
+# Downloaded fonts are build dependencies, not redistributable project assets.
+/font/*.ttf
+/font/*.ttc
+
 # Keep the stable release artifact.
 !output/
 !output/pdf/

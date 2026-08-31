@@ -1,6 +1,9 @@
-.PHONY: build render check clean
+.PHONY: fonts build render check clean
 
-build:
+fonts:
+	bash scripts/download-fonts.sh
+
+build: fonts
 	bash scripts/build.sh
 
 render: build
@@ -11,4 +14,3 @@ check: build
 
 clean:
 	rm -rf build tmp/pdfs
-

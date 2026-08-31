@@ -11,20 +11,28 @@ mkdir -p "$render_dir"
 
 render_log="$project_root/tmp/pdfs/render.log"
 if command -v pdftoppm >/dev/null 2>&1; then
-  pdftoppm -png -r 120 "$pdf_file" "$render_dir/page" \
-    >/dev/null 2>"$render_log" || true
-fi
-
-if ! find "$render_dir" -name '*.png' -print -quit | rg -q . || \
-  rg -q 'Missing language pack|Unknown font tag|No font in show' "$render_log" 2>/dev/null; then
+  if ! pdftoppm -png -r 120 "$pdf_file" "$render_dir/page" \
+    >/dev/null 2>"$render_log"; then
+    cat "$render_log" >&2
+    exit 1
+  fi
+  if rg -q 'Missing language pack|Unknown font tag|No font in show' "$render_log"; then
+    cat "$render_log" >&2
+    printf 'PDF contains CJK fonts that Poppler cannot render.\n' >&2
+    exit 1
+  fi
+else
   command -v gs >/dev/null 2>&1 || {
     printf 'Rendering requires pdftoppm or Ghostscript.\n' >&2
     exit 1
   }
-  rm -f "$render_dir"/*.png
   gs -q -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -r120 \
     -sOutputFile="$render_dir/page-%02d.png" "$pdf_file"
-  printf 'Poppler could not map embedded CJK fonts; used Ghostscript fallback.\n'
 fi
+
+find "$render_dir" -name '*.png' -print -quit | rg -q . || {
+  printf 'Renderer produced no PNG pages.\n' >&2
+  exit 1
+}
 
 printf 'Rendered pages to %s\n' "$render_dir"
