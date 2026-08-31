@@ -69,6 +69,7 @@
 \definecolor{AgentBlue}{HTML}{2B6F9C}
 \definecolor{AgentGold}{HTML}{D89B32}
 \definecolor{AgentCoral}{HTML}{CF5A5A}
+\definecolor{CoverRed}{HTML}{D94F35}
 \definecolor{AgentMist}{HTML}{F1F5F3}
 \definecolor{AgentPaper}{HTML}{FCFDFC}
 \definecolor{AgentLine}{HTML}{D6E0DC}
@@ -217,46 +218,28 @@
 
 \newcommand{\makedigitalcover}{
   \begin{titlepage}
-    \pagecolor{AgentInk}\color{white}
+    \pagecolor{AgentPaper}\color{AgentInk}
     \begin{tikzpicture}[remember picture,overlay]
-      \fill[AgentGreen] (current page.north west) rectangle ($(current page.north east)+(0,-9mm)$);
-      \fill[AgentGold] ($(current page.south west)+(0,10mm)$) rectangle (current page.south east);
-      \draw[AgentGreen!60,line width=0.8pt]
-        ($(current page.center)+(-52mm,-36mm)$) grid[step=13mm] ($(current page.center)+(52mm,36mm)$);
-      \foreach \x/\y/\c in {-39/26/AgentGold,-13/13/AgentGreen,13/26/AgentBlue,39/13/AgentCoral,-26/-13/AgentBlue,0/-26/AgentGold,26/-13/AgentGreen}{
-        \fill[\c] ($(current page.center)+(\x mm,\y mm)$) circle (2.4mm);
-      }
-      \draw[white!55,line width=0.65pt,-{Stealth[length=2mm]}]
-        ($(current page.center)+(-39mm,26mm)$) -- ($(current page.center)+(-13mm,13mm)$)
-        -- ($(current page.center)+(13mm,26mm)$) -- ($(current page.center)+(39mm,13mm)$);
-      \draw[white!55,line width=0.65pt,-{Stealth[length=2mm]}]
-        ($(current page.center)+(-26mm,-13mm)$) -- ($(current page.center)+(0mm,-26mm)$)
-        -- ($(current page.center)+(26mm,-13mm)$);
-      \draw[white!45,line width=0.65pt,-{Stealth[length=2mm]}]
-        ($(current page.center)+(-13mm,13mm)$) -- ($(current page.center)+(0mm,-26mm)$);
-      \draw[white!45,line width=0.65pt,-{Stealth[length=2mm]}]
-        ($(current page.center)+(13mm,26mm)$) -- ($(current page.center)+(26mm,-13mm)$);
+      \node[inner sep=0pt] at (current page.center) {
+        \includegraphics[width=\paperwidth,height=\paperheight]{assets/cover/cover-art-01.png}
+      };
     \end{tikzpicture}
 
-    \vspace*{22mm}
-    {\sffamily\small\bfseries\color{AgentGold} FROM FIRST LOOP TO PRODUCTION}\par
-    \vspace{7mm}
-    {\sffamily\bfseries\fontsize{38}{45}\selectfont 动手学\par}
-    {\sffamily\bfseries\fontsize{52}{58}\selectfont\color{AgentGreen} Agent\par}
+    \vspace*{4mm}
+    {\sffamily\fontsize{9.5}{12}\selectfont\bfseries\color{AgentBlue}
+      PRACTICAL AI SYSTEMS\par}
     \vspace{5mm}
-    {\Large 从最小循环到生产级智能体系统}\par
+    {\sffamily\bfseries\fontsize{43}{51}\selectfont
+      动手学\enspace\textcolor{CoverRed}{Agent}\par}
+    \vspace{3mm}
+    {\sffamily\fontsize{15}{20}\selectfont 从最小循环到生产级智能体系统}\par
+    \vspace{4mm}
+    {\color{AgentInk!55}\rule{31mm}{0.7pt}}\par
 
     \vfill
-    \begin{minipage}{0.75\textwidth}
-      \small\color{white!82}
-      工具调用 · 上下文工程 · 记忆与 RAG · MCP · 多 Agent\\
-      评测 · 安全 · 可观测性 · 产品设计 · 30 天实践路线
-    \end{minipage}
-    \vspace{13mm}
-
-    {\sffamily\bfseries DreamingRiverForUs}\hfill
+    {\sffamily\small\bfseries DreamingRiverForUs}\hfill
     {\sffamily\small v\BookVersion}
-    \vspace*{15mm}
+    \vspace*{6mm}
   \end{titlepage}
-  \nopagecolor\color{AgentInk}
+  \pagecolor{AgentPaper}\color{AgentInk}
 }

@@ -61,6 +61,7 @@ make check
 hands-on-agent/
 ├── book.tex                  # 全书入口
 ├── config/style.tex          # 字体、配色、章节和提示框样式
+├── assets/cover/             # 封面主视觉与可复现生图提示词
 ├── font/                     # 本地字体目录与下载说明（字体文件不入库）
 ├── chapters/                 # 正文章节
 ├── appendices/               # 资源地图、术语与检查表

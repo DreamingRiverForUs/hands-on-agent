@@ -29,6 +29,14 @@ Required font files and download URLs:
 
 Store these files under `font/`. Always use the download script so its pinned SHA-256 checksums are verified. Do not commit `.ttf` or `.ttc` binaries; they are external build dependencies and may have redistribution restrictions. After font or layout changes, run both `make check` and `make render`, then inspect the rendered PNG pages for missing glyphs, boxes, overlap, or misalignment.
 
+## Cover workflow
+
+- Use the `$book-cover-image` skill for cover redesigns instead of article or social-media cover skills.
+- Generate raster artwork through ZenMux with `qwen/qwen-image-3.0-pro`; do not substitute `gpt-image-2` unless the user explicitly changes the model.
+- Keep generated artwork free of title text. Compose Chinese title, subtitle, author, and version in `config/style.tex` with the repository fonts.
+- Save reproducible prompts and selected artwork under `assets/cover/`.
+- After changing the cover, rebuild the PDF, render all pages, and visually inspect the cover at full size and thumbnail size.
+
 ## Writing conventions
 
 - Write original Chinese explanations; link and cite primary sources.
