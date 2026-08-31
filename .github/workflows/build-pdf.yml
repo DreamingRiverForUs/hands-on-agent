@@ -1,0 +1,32 @@
+name: Build PDF
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile book
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: book.tex
+          latexmk_use_xelatex: true
+          args: -interaction=nonstopmode -halt-on-error -file-line-error
+
+      - name: Prepare artifact
+        run: |
+          mkdir -p output/pdf
+          cp book.pdf output/pdf/hands-on-agent.pdf
+
+      - name: Upload PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: hands-on-agent-pdf
+          path: output/pdf/hands-on-agent.pdf
+

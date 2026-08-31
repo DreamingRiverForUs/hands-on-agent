@@ -1,0 +1,64 @@
+\documentclass[11pt,openany,fontset=fandol]{ctexbook}
+
+\input{config/style}
+
+\begin{document}
+
+\makedigitalcover
+
+\thispagestyle{empty}
+\vspace*{0.18\textheight}
+{\sffamily\bfseries\fontsize{24}{30}\selectfont 动手学 Agent}\par
+\vspace{0.7em}
+{\sffamily\large 从最小循环到生产级智能体系统}\par
+\vfill
+\begin{minipage}{0.82\textwidth}
+\small
+\textbf{版本}\quad \BookVersion（\BookDate）\\[0.6em]
+\textbf{作者与维护}\quad DreamingRiverForUs\\[0.6em]
+\textbf{内容许可}\quad CC BY-NC-SA 4.0\\
+\textbf{代码许可}\quad MIT\\[0.6em]
+本书是原创学习导读与实践教程。第三方课程、论文、视频和开源项目仍受各自许可证与使用条款约束；本书仅链接公开原始来源，不提供盗版或来源不明的网盘资源。\\[0.8em]
+\url{https://github.com/DreamingRiverForUs/hands-on-agent}
+\end{minipage}
+\vspace*{0.12\textheight}
+\clearpage
+
+\frontmatter
+\input{chapters/00-preface}
+\tableofcontents
+
+\mainmatter
+
+\part{先理解：Agent 到底是什么}
+\input{chapters/01-when-to-use-agent}
+\input{chapters/02-agent-anatomy}
+\input{chapters/03-workflow-patterns}
+
+\part{再动手：从零搭建 Agent}
+\input{chapters/04-minimal-agent}
+\input{chapters/05-tools-and-contracts}
+\input{chapters/06-context-memory-rag}
+\input{chapters/07-planning-multi-agent}
+\input{chapters/08-mcp-and-skills}
+
+\part{做可靠：从 Demo 到生产系统}
+\input{chapters/09-reliability}
+\input{chapters/10-evaluation-observability}
+\input{chapters/11-security-human-control}
+\input{chapters/12-product-ux}
+
+\part{做出来：项目与长期成长}
+\input{chapters/13-capstone-projects}
+\input{chapters/14-learning-roadmap}
+
+\appendix
+\input{appendices/a-resource-map}
+\input{appendices/b-glossary-checklists}
+
+\backmatter
+\bibliography{references}
+
+\input{chapters/99-colophon}
+
+\end{document}

@@ -1,0 +1,234 @@
+\usepackage[
+  paperwidth=170mm,
+  paperheight=240mm,
+  inner=20mm,
+  outer=17mm,
+  top=20mm,
+  bottom=22mm,
+  headheight=14pt,
+  headsep=7mm
+]{geometry}
+
+\usepackage{fontspec}
+\setmainfont{texgyrepagella-regular.otf}[
+  BoldFont=texgyrepagella-bold.otf,
+  ItalicFont=texgyrepagella-italic.otf,
+  BoldItalicFont=texgyrepagella-bolditalic.otf
+]
+\setsansfont{texgyreheros-regular.otf}[
+  BoldFont=texgyreheros-bold.otf,
+  ItalicFont=texgyreheros-italic.otf,
+  BoldItalicFont=texgyreheros-bolditalic.otf
+]
+\setmonofont{texgyrecursor-regular.otf}[
+  BoldFont=texgyrecursor-bold.otf,
+  ItalicFont=texgyrecursor-italic.otf,
+  BoldItalicFont=texgyrecursor-bolditalic.otf
+]
+\setCJKmainfont{FandolSong-Regular.otf}[
+  BoldFont=FandolSong-Bold.otf,
+  ItalicFont=FandolKai-Regular.otf
+]
+\setCJKsansfont{FandolHei-Regular.otf}[
+  BoldFont=FandolHei-Bold.otf
+]
+\setCJKmonofont{FandolFang-Regular.otf}
+
+\usepackage{xcolor}
+\definecolor{AgentInk}{HTML}{1D2730}
+\definecolor{AgentGreen}{HTML}{14866D}
+\definecolor{AgentBlue}{HTML}{2B6F9C}
+\definecolor{AgentGold}{HTML}{D89B32}
+\definecolor{AgentCoral}{HTML}{CF5A5A}
+\definecolor{AgentMist}{HTML}{F1F5F3}
+\definecolor{AgentPaper}{HTML}{FCFDFC}
+\definecolor{AgentLine}{HTML}{D6E0DC}
+\definecolor{CodeBg}{HTML}{F5F7F6}
+
+\pagecolor{AgentPaper}
+\color{AgentInk}
+
+\usepackage{microtype}
+\usepackage{setspace}
+\setstretch{1.16}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.25em}
+
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,calc,fit,positioning,shapes.geometric}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\setlist{nosep,leftmargin=2em}
+\setlist[itemize]{label=\textcolor{AgentGreen}{\small\textbullet}}
+\setlist[enumerate]{label=\textcolor{AgentBlue}{\arabic*.}}
+
+\usepackage{titlesec}
+\titleformat{\part}[display]
+  {\centering\sffamily\bfseries\color{AgentGreen}}
+  {\fontsize{18}{22}\selectfont 第\thepart\ 部分}
+  {1.1em}
+  {\fontsize{32}{38}\selectfont}
+
+\titleformat{\chapter}[display]
+  {\sffamily\bfseries\color{AgentInk}}
+  {\color{AgentGreen}\fontsize{13}{16}\selectfont CHAPTER\enspace\thechapter}
+  {0.6em}
+  {\fontsize{27}{33}\selectfont}
+  [\vspace{0.7em}\color{AgentLine}\titlerule]
+
+\titleformat{\section}
+  {\Large\sffamily\bfseries\color{AgentBlue}}
+  {\thesection}{0.65em}{}
+\titleformat{\subsection}
+  {\large\sffamily\bfseries\color{AgentGreen}}
+  {\thesubsection}{0.6em}{}
+
+\titlespacing*{\chapter}{0pt}{-12pt}{24pt}
+\titlespacing*{\section}{0pt}{1.8em}{0.7em}
+\titlespacing*{\subsection}{0pt}{1.4em}{0.5em}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\small\sffamily\color{AgentGreen}\thepage\quad 动手学 Agent}
+\fancyhead[RO]{\small\sffamily\color{AgentGreen}\leftmark\quad\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[C]{\small\sffamily\color{AgentGreen}\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+\usepackage[most]{tcolorbox}
+\tcbset{
+  enhanced,
+  boxrule=0.6pt,
+  arc=1.5mm,
+  left=3.2mm,
+  right=3.2mm,
+  top=2.4mm,
+  bottom=2.4mm,
+  before skip=1em,
+  after skip=1em,
+  fonttitle=\sffamily\bfseries
+}
+
+\newtcolorbox{definitionbox}[1]{
+  title={#1},
+  colback=AgentMist,
+  colframe=AgentGreen,
+  coltitle=AgentGreen
+}
+\newtcolorbox{takeaway}[1][本节要点]{
+  title={#1},
+  colback=AgentMist,
+  colframe=AgentBlue,
+  coltitle=AgentBlue
+}
+\newtcolorbox{practice}[1][动手任务]{
+  title={#1},
+  colback=AgentGold!7,
+  colframe=AgentGold,
+  coltitle=AgentInk
+}
+\newtcolorbox{warningbox}[1][风险提示]{
+  title={#1},
+  colback=AgentCoral!6,
+  colframe=AgentCoral,
+  coltitle=AgentCoral
+}
+\newtcolorbox{checkpoint}[1][完成检查]{
+  title={#1},
+  colback=AgentGreen!5,
+  colframe=AgentGreen,
+  coltitle=AgentGreen
+}
+
+\usepackage{fvextra}
+\DefineVerbatimEnvironment{codeblock}{Verbatim}{
+  fontsize=\small,
+  breaklines=true,
+  breakanywhere=true,
+  frame=single,
+  rulecolor=\color{AgentLine},
+  framesep=3mm,
+  bgcolor=CodeBg
+}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\term}[1]{\textbf{\color{AgentGreen}#1}}
+\newcommand{\eng}[1]{\textsf{#1}}
+\newcommand{\checkbox}{\raisebox{0.15ex}{\tikz\draw[AgentGreen,line width=0.5pt] (0,0) rectangle (0.16,0.16);}\,}
+
+\usepackage{natbib}
+\bibliographystyle{plainnat}
+\setcitestyle{numbers,square,comma}
+
+\usepackage{xurl}
+\usepackage{hyperref}
+\hypersetup{
+  hypertexnames=false,
+  colorlinks=true,
+  linkcolor=AgentGreen,
+  citecolor=AgentBlue,
+  urlcolor=AgentBlue,
+  pdfauthor={DreamingRiverForUs},
+  pdftitle={动手学 Agent},
+  pdfsubject={AI Agent 实践电子书},
+  pdfkeywords={AI Agent, LLM, MCP, RAG, Evaluation}
+}
+\urlstyle{same}
+\usepackage{bookmark}
+
+\newcommand{\BookVersion}{0.1.0-draft}
+\newcommand{\BookDate}{2026-08-31}
+
+\newcommand{\makedigitalcover}{
+  \begin{titlepage}
+    \pagecolor{AgentInk}\color{white}
+    \begin{tikzpicture}[remember picture,overlay]
+      \fill[AgentGreen] (current page.north west) rectangle ($(current page.north east)+(0,-9mm)$);
+      \fill[AgentGold] ($(current page.south west)+(0,10mm)$) rectangle (current page.south east);
+      \draw[AgentGreen!60,line width=0.8pt]
+        ($(current page.center)+(-52mm,-36mm)$) grid[step=13mm] ($(current page.center)+(52mm,36mm)$);
+      \foreach \x/\y/\c in {-39/26/AgentGold,-13/13/AgentGreen,13/26/AgentBlue,39/13/AgentCoral,-26/-13/AgentBlue,0/-26/AgentGold,26/-13/AgentGreen}{
+        \fill[\c] ($(current page.center)+(\x mm,\y mm)$) circle (2.4mm);
+      }
+      \draw[white!55,line width=0.65pt,-{Stealth[length=2mm]}]
+        ($(current page.center)+(-39mm,26mm)$) -- ($(current page.center)+(-13mm,13mm)$)
+        -- ($(current page.center)+(13mm,26mm)$) -- ($(current page.center)+(39mm,13mm)$);
+      \draw[white!55,line width=0.65pt,-{Stealth[length=2mm]}]
+        ($(current page.center)+(-26mm,-13mm)$) -- ($(current page.center)+(0mm,-26mm)$)
+        -- ($(current page.center)+(26mm,-13mm)$);
+      \draw[white!45,line width=0.65pt,-{Stealth[length=2mm]}]
+        ($(current page.center)+(-13mm,13mm)$) -- ($(current page.center)+(0mm,-26mm)$);
+      \draw[white!45,line width=0.65pt,-{Stealth[length=2mm]}]
+        ($(current page.center)+(13mm,26mm)$) -- ($(current page.center)+(26mm,-13mm)$);
+    \end{tikzpicture}
+
+    \vspace*{22mm}
+    {\sffamily\small\bfseries\color{AgentGold} FROM FIRST LOOP TO PRODUCTION}\par
+    \vspace{7mm}
+    {\sffamily\bfseries\fontsize{38}{45}\selectfont 动手学\par}
+    {\sffamily\bfseries\fontsize{52}{58}\selectfont\color{AgentGreen} Agent\par}
+    \vspace{5mm}
+    {\Large 从最小循环到生产级智能体系统}\par
+
+    \vfill
+    \begin{minipage}{0.75\textwidth}
+      \small\color{white!82}
+      工具调用 · 上下文工程 · 记忆与 RAG · MCP · 多 Agent\\
+      评测 · 安全 · 可观测性 · 产品设计 · 30 天实践路线
+    \end{minipage}
+    \vspace{13mm}
+
+    {\sffamily\bfseries DreamingRiverForUs}\hfill
+    {\sffamily\small v\BookVersion}
+    \vspace*{15mm}
+  \end{titlepage}
+  \nopagecolor\color{AgentInk}
+}

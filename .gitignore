@@ -1,0 +1,23 @@
+/build/
+/tmp/
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+.DS_Store
+__pycache__/
+*.py[cod]
+
+# Keep the stable release artifact.
+!output/
+!output/pdf/
+!output/pdf/hands-on-agent.pdf

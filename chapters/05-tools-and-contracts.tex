@@ -1,0 +1,136 @@
+\chapter{工具设计与执行契约}
+\label{chap:tools}
+
+\begin{takeaway}[学习目标]
+学会把内部 API、文件系统和业务动作包装成 Agent 可理解、可校验、可授权的工具；掌握 schema、错误语义、幂等、超时、权限和 dry-run 设计。
+\end{takeaway}
+
+\section{工具是 Agent 的产品界面}
+
+人通过按钮、表单和反馈理解软件；模型通过工具名称、描述、参数和返回值理解环境。一个含糊工具会把歧义带进每次决策。工具设计因此不是简单的函数包装，而是 \eng{Agent-Computer Interface} 设计。
+
+\section{一个完整的工具合同}
+
+每个工具至少回答九个问题：
+
+\begin{enumerate}
+  \item 它完成什么单一动作？
+  \item 什么情况下应该调用，什么情况下不应该？
+  \item 必填、可选参数及格式是什么？
+  \item 返回值中哪些字段是事实，哪些是提示？
+  \item 可能出现哪些可区分错误？
+  \item 是否有副作用，是否可撤销？
+  \item 重复调用是否安全，即是否幂等？
+  \item 需要什么权限或人工确认？
+  \item 超时、速率限制和成本上限是什么？
+\end{enumerate}
+
+\begin{codeblock}
+name: create_invoice_draft
+purpose: 为已存在的客户创建发票草稿，不发送
+required: customer_id, line_items, currency
+returns: draft_id, subtotal, tax, total, warnings
+side_effect: 创建可删除的草稿
+approval: 单笔总额超过 10,000 元需要财务确认
+idempotency: client_request_id
+errors: CUSTOMER_NOT_FOUND, INVALID_ITEM, LIMIT_EXCEEDED
+\end{codeblock}
+
+\section{窄工具通常优于万能工具}
+
+\code{run\_sql(query)} 和 \code{run\_shell(command)} 给模型巨大的表达空间，也把权限边界推给模型。生产工具更适合围绕业务意图设计，例如 \code{get\_order(order\_id)}、\code{list\_overdue\_invoices(customer\_id)}。窄工具便于授权、审计和测试。
+
+但也不能拆得过碎。如果创建一个业务对象必须连续调用十二个底层 CRUD 工具，模型会承担不必要的事务一致性。判断标准是：一个工具应对应\term{可独立授权、可独立验证的业务动作}。
+
+\section{参数 schema 的实用规则}
+
+\begin{itemize}
+  \item 使用业务词汇，不使用 \code{x}、\code{data} 等泛化名称。
+  \item 能枚举就枚举，能限制范围就限制范围。
+  \item 日期使用 ISO 8601，并明确时区。
+  \item 金额使用最小货币单位整数或 decimal 字符串，不用浮点数。
+  \item 标识符与显示名称分开，避免同名对象误操作。
+  \item 把“为什么执行”放进 \code{reason} 审计字段，但不要以它代替授权。
+\end{itemize}
+
+\section{返回值应支持下一步决策}
+
+工具结果不是给终端用户的文案，而是 Agent 的观察。应返回稳定、紧凑、可操作的数据。列表查询要有总数、分页游标和截断标志；写操作要返回新状态、资源 ID、审计 ID 和可撤销信息；失败要返回机器可读错误码与可恢复性。
+
+\begin{codeblock}
+{
+  "ok": false,
+  "error": {
+    "code": "RATE_LIMITED",
+    "retryable": true,
+    "retry_after_seconds": 4,
+    "message": "Search quota temporarily exhausted"
+  }
+}
+\end{codeblock}
+
+不要把几万行原始日志直接塞回上下文。工具可以把完整结果保存为 artifact，只返回摘要、引用位置和句柄，需要时再按段读取。
+
+\section{副作用分级}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{>{\bfseries}p{0.16\textwidth} p{0.23\textwidth} X}
+\toprule
+级别 & 示例 & 默认控制 \\
+\midrule
+L0 只读 & 搜索公开网页、读配置 & 自动执行，仍记录访问范围 \\
+L1 可逆写入 & 创建草稿、写临时文件 & 自动或批量确认，提供 undo \\
+L2 外部影响 & 发消息、创建工单 & 执行前展示预览和接收方 \\
+L3 高价值 & 付款、发布、改生产数据 & 强制人工确认、双重校验 \\
+L4 禁止 & 绕过权限、获取密钥 & 工具层不暴露 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+同一个动作的风险还取决于参数。发送给自己的测试消息和群发十万人不能共用一个审批阈值。策略引擎应根据对象、数量、金额、环境和用户身份动态判定。
+
+\section{dry-run、proposal 与 commit}
+
+高风险动作建议分成三段：
+
+\begin{enumerate}
+  \item \textbf{proposal}：解析意图并生成规范化变更计划。
+  \item \textbf{dry-run}：验证权限、冲突、影响范围和预计费用，不修改状态。
+  \item \textbf{commit}：携带 proposal 哈希与批准令牌执行，防止确认后参数被替换。
+\end{enumerate}
+
+用户确认界面必须显示实际对象、影响范围和不可逆后果。“是否继续？”没有足够信息，不构成有效同意。
+
+\section{超时、重试与幂等}
+
+只对瞬时错误重试，例如网络抖动、限流或临时服务不可用。参数非法、权限不足和资源不存在通常不应原样重试。指数退避需要随机抖动，避免大量 Agent 同时再次请求。
+
+写操作重试前必须有幂等键。若第一次请求成功但响应丢失，没有幂等键的第二次请求可能重复付款或重复发送。幂等键应由任务和动作身份生成，由服务端保存处理结果。
+
+\section{工具测试金字塔}
+
+\begin{enumerate}
+  \item 函数单元测试：边界值、类型、业务规则、错误码。
+  \item 合同测试：schema 与真实接口一致，兼容版本变化。
+  \item 策略测试：不同身份、环境、金额对应正确权限。
+  \item 模型选择测试：面对相近工具时，模型能选对并填对参数。
+  \item 端到端测试：在沙箱环境中验证真实副作用与恢复。
+\end{enumerate}
+
+仓库中的 \code{examples/02\_safe\_tools.py} 展示注册表、参数校验、权限分级、dry-run 和幂等缓存。它不是生产权限系统，但呈现了应放在哪一层。
+
+\begin{practice}[重构一个危险工具]
+选择 \code{run\_shell}、\code{execute\_sql} 或 \code{send\_email}，把它拆成 2--4 个业务工具。为每个工具写合同、错误码、副作用等级和至少五个测试用例。
+\end{practice}
+
+\begin{checkpoint}
+\begin{itemize}
+  \item \checkbox 工具描述同时说明适用与不适用场景。
+  \item \checkbox 写操作有副作用等级、幂等键和审计记录。
+  \item \checkbox 高风险动作支持 proposal、dry-run 与确认后提交。
+  \item \checkbox 错误结果能告诉 Agent 是否重试以及何时重试。
+\end{itemize}
+\end{checkpoint}
+

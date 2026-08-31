@@ -1,0 +1,122 @@
+\chapter{Agent 的六个组成部分}
+
+\begin{takeaway}[学习目标]
+本章建立一个跨框架的 Agent 心智模型：模型、上下文、工具、状态、策略与反馈。你将画出自己的 Agent 数据流，并识别每个故障应归属的层。
+\end{takeaway}
+
+\section{从循环看系统，而不是从聊天框看产品}
+
+Agent 的用户界面可能是聊天框、命令行、定时任务或后台服务，但底层都有相似的控制循环。
+
+\begin{center}
+\begin{tikzpicture}[
+  node distance=10mm and 12mm,
+  box/.style={rounded corners=1.5mm,draw=AgentLine,fill=AgentMist,minimum width=29mm,minimum height=11mm,align=center,font=\small\sffamily},
+  flow/.style={-{Stealth[length=2.2mm]},line width=0.8pt,draw=AgentGreen}
+]
+\node[box] (goal) {目标与约束};
+\node[box,right=of goal] (context) {上下文组装};
+\node[box,right=of context] (model) {模型决策};
+\node[box,below=of model] (tool) {工具执行};
+\node[box,left=of tool] (feedback) {环境反馈};
+\node[box,left=of feedback] (state) {状态更新};
+\draw[flow] (goal) -- (context);
+\draw[flow] (context) -- (model);
+\draw[flow] (model) -- (tool);
+\draw[flow] (tool) -- (feedback);
+\draw[flow] (feedback) -- (state);
+\draw[flow] (state) |- (context);
+\draw[flow,dashed,draw=AgentCoral] (state) -- node[below,font=\scriptsize\sffamily]{完成/停止} (goal);
+\end{tikzpicture}
+\end{center}
+
+把这个循环拆成六个部分，有助于避免把所有失败都归咎于模型。
+
+\section{模型：决策组件，不是整个系统}
+
+模型负责理解当前上下文、提出候选动作、生成工具参数或最终输出。它的能力受模型本身、采样参数、提示、可见工具和上下文质量共同影响。
+
+模型选型不应只比较榜单分数，还要比较：
+
+\begin{itemize}
+  \item 工具调用和结构化输出的稳定性；
+  \item 长上下文中的指令保持能力；
+  \item 延迟、价格、速率限制与地区可用性；
+  \item 对目标语言、代码和领域知识的支持；
+  \item 是否能返回足够的使用量和追踪信息。
+\end{itemize}
+
+\section{上下文：模型这一轮能够看到什么}
+
+上下文不是“所有历史记录”。它是一次决策前，被系统选择并排列给模型的信息。典型内容包括系统指令、用户目标、当前计划、工具定义、短期历史、检索材料、环境状态和失败摘要。
+
+上下文工程的核心问题是选择：什么必须保留？什么可以压缩？什么应该外置？什么会互相冲突？Anthropic 将有效上下文工程描述为在有限窗口内维护高信号信息的过程\citep{anthropic_context_engineering}。
+
+\begin{definitionbox}{上下文预算}
+上下文预算是一次模型调用中，分配给指令、状态、历史、检索材料、工具定义和输出空间的 token 配额。预算不是越大越好；无关信息会降低注意力密度并增加成本。
+\end{definitionbox}
+
+\section{工具：Agent 与世界之间的接口}
+
+工具把语言意图变成可执行动作。搜索、读文件、查数据库、运行代码、发消息、创建订单都可以是工具。工具接口决定模型能否准确行动，因此 Agent-Computer Interface 与人机界面一样需要设计和测试\citep{anthropic_effective_agents}。
+
+一个工具至少有：名称、用途描述、参数 schema、返回值、错误语义、权限要求和幂等策略。第~\ref{chap:tools}~章会专门实现它。
+
+\section{状态：跨步骤保存事实}
+
+状态包括当前目标、已完成步骤、工具结果、预算、错误计数、用户偏好和待确认动作。状态应尽量结构化，并由程序控制；不要把全部状态埋在自然语言对话里。
+
+\begin{table}[htbp]
+\centering
+\begin{tabularx}{\textwidth}{>{\bfseries}p{0.2\textwidth} X X}
+\toprule
+状态类型 & 示例 & 推荐保存方式 \\
+\midrule
+任务状态 & 当前阶段、待办步骤、完成条件 & JSON/数据库字段 \\
+环境状态 & 文件版本、页面 URL、订单状态 & 工具返回的事实 \\
+会话状态 & 用户选择、临时变量、错误计数 & session store \\
+长期偏好 & 语言、格式、稳定偏好 & 显式用户资料 \\
+证据状态 & 来源、引用、测试结果 & 可追溯记录 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{策略：允许怎么行动}
+
+策略不等于模型 prompt。它包括系统规则、工具权限、最大步数、预算、重试、人工确认和终止条件。关键策略应该在代码和权限层执行，而不是只用自然语言提醒。
+
+例如，“删除文件前询问用户”如果只写在 prompt 中，模型仍可能违反。更稳妥的实现是：删除工具总是先生成 proposal，由独立确认状态解锁执行。
+
+\section{反馈：把生成变成闭环}
+
+反馈可以来自编译器、测试、HTTP 状态、数据库结果、用户确认、评分器或人工审查。高质量反馈应具体、及时、可操作，并能指向下一步。
+
+“失败了”是弱反馈；“字段 \code{email} 缺失，schema 校验失败”是强反馈。Agent 的可靠性往往取决于反馈接口，而非它能否写出长篇推理。
+
+\section{把故障归层}
+
+当 Agent 失败时，先定位层级：
+
+\begin{itemize}
+  \item 误解目标：上下文或任务合同问题。
+  \item 选错工具：工具描述、模型或路由问题。
+  \item 参数错误：schema、示例或校验问题。
+  \item 重复循环：状态、停止条件或反馈问题。
+  \item 忘记约束：上下文压缩或优先级问题。
+  \item 越权执行：权限和策略问题。
+  \item 输出看似正确但事实错误：证据与评测问题。
+\end{itemize}
+
+\begin{practice}[画出你的六层图]
+为序言中选择的场景画一张数据流图。每一层写出具体组件，并在箭头上标注传递的数据。然后列出三个最可能的故障，把它们归到六层之一。
+\end{practice}
+
+\begin{checkpoint}
+\begin{itemize}
+  \item \checkbox 我能指出模型之外的五个核心组成部分。
+  \item \checkbox 我的任务状态有结构化字段，而非只存在聊天历史里。
+  \item \checkbox 我为高风险动作设计了代码层确认策略。
+  \item \checkbox 我知道系统从哪里获得可验证反馈。
+\end{itemize}
+\end{checkpoint}
+

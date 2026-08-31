@@ -1,0 +1,108 @@
+\chapter{从零实现最小 Agent}
+\label{chap:minimal-agent}
+
+\begin{takeaway}[学习目标]
+本章不依赖任何 Agent 框架，用几十行 Python 搭出完整控制循环。你将理解消息、动作、工具结果、状态与终止条件如何配合，并能把真实模型 API 接到同一接口上。
+\end{takeaway}
+
+\section{先定义一个可验证的小世界}
+
+第一个 Agent 不应该从“访问整个互联网”开始。我们构造一个库存查询任务：用户提出包含多个商品的问题，Agent 可以调用\code{lookup\_stock}，收集事实后给出回答。这个环境虽小，却包含真实系统的全部骨架。
+
+\begin{definitionbox}{一次 Agent 步骤}
+一次步骤由四件事组成：读取当前状态；模型返回动作；系统执行并记录动作；检查任务是否完成。循环只是重复这些步骤，而可靠性来自每一步都有明确数据结构。
+\end{definitionbox}
+
+\section{动作协议}
+
+不要让模型返回一段需要用正则猜测的自然语言。最小协议只允许两种动作：调用工具，或给出最终答案。
+
+\begin{codeblock}
+{"type": "tool", "name": "lookup_stock",
+ "arguments": {"sku": "A-17"}}
+
+{"type": "final", "answer": "A-17 当前有 12 件库存。"}
+\end{codeblock}
+
+真实 API 的 function calling、tool use 或 structured output 在字段名上不同，但思想相同：\term{模型提出结构化意图，宿主程序掌握执行权}。
+
+\section{控制循环的五道关}
+
+\begin{enumerate}
+  \item \textbf{输入关}：目标、可用工具和预算进入初始状态。
+  \item \textbf{决策关}：模型只产生符合协议的候选动作。
+  \item \textbf{校验关}：代码检查动作类型、工具名和参数。
+  \item \textbf{执行关}：工具在受控边界内运行，结果写回状态。
+  \item \textbf{终止关}：最终答案、最大步数、预算耗尽或不可恢复错误结束循环。
+\end{enumerate}
+
+仓库中的 \code{examples/01\_minimal\_agent.py} 使用一个确定性策略模拟模型，因此离线也能运行。替换其中的 \code{decide} 函数即可接入任意支持结构化输出的模型。
+
+\begin{codeblock}
+for step in range(max_steps):
+    action = decide(goal, history, tools)
+    validate_action(action)
+
+    if action["type"] == "final":
+        return action["answer"]
+
+    observation = run_tool(action["name"], action["arguments"])
+    history.append({"action": action, "observation": observation})
+
+raise StepLimitExceeded(max_steps)
+\end{codeblock}
+
+这段代码里，\code{history} 是工作状态，不是为了复刻聊天记录。每条记录都应保留动作、参数、结果、耗时、错误和调用标识，后续才能重放与评测。
+
+\section{接入真实模型时要补什么}
+
+\subsection{统一模型适配层}
+
+把厂商差异封装在一个窄接口之后：输入标准消息和工具 schema，输出本书定义的动作。适配层还应返回 token 用量、模型版本、请求 ID、延迟和停止原因。不要让业务循环散落厂商专属字段。
+
+\subsection{解析失败不是模型的“想法”}
+
+JSON 不合法、字段缺失和参数类型错误都属于协议失败。处理顺序应是：本地 schema 校验；向模型返回精确错误；最多重试有限次数；仍失败则降级或交给人工。永远不要静默修补高风险参数。
+
+\subsection{终止是一等能力}
+
+一个系统不仅要会行动，还要会停止。至少定义：正常完成、用户取消、步数上限、时间上限、费用上限、重复动作、工具持续失败、等待人工确认。停止原因必须能在日志中区分。
+
+\begin{table}[htbp]
+\centering
+\begin{tabularx}{\textwidth}{>{\bfseries}p{0.22\textwidth} X X}
+\toprule
+终止类型 & 检测方法 & 对用户的结果 \\
+\midrule
+完成 & 满足任务合同 & 答案、证据与执行摘要 \\
+预算耗尽 & 步数、时间或 token 超限 & 已完成部分与继续方式 \\
+重复循环 & 动作签名连续重复 & 停止并暴露最后观察 \\
+权限等待 & 动作需要批准 & 显示影响范围和确认项 \\
+不可恢复错误 & 重试和替代路径均失败 & 错误编号与恢复建议 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{从日志重放一次运行}
+
+为每次运行生成 \code{run\_id}，为每一步生成 \code{step\_id}。记录输入摘要、动作、工具结果、耗时、模型用量和状态变化。开发环境可以保存完整内容；生产环境必须先脱敏，并设置保存期限。
+
+重放不一定重新调用真实工具。更安全的做法是把历史工具结果当作 fixture，复现“当时的信息下模型为何走到这一步”。如果需要验证当前环境，则创建新的运行并关联原运行，避免混淆历史事实。
+
+\begin{warningbox}
+不要把模型输出直接传给 \code{eval}、shell 或 SQL。结构化输出只解决语法问题，不自动解决权限、注入和业务合法性。所有动作仍须通过工具层验证。
+\end{warningbox}
+
+\begin{practice}[把模拟模型换成真实模型]
+保留示例的 Agent 循环和工具注册表，只替换 \code{decide}。准备 10 个问题，其中包含未知商品、重复询问、参数注入和无法完成的任务。记录完成率、平均步骤数、协议错误率和单次成本。
+\end{practice}
+
+\begin{checkpoint}
+\begin{itemize}
+  \item \checkbox 我的模型只能提出动作，不能绕过宿主程序直接执行。
+  \item \checkbox 每个动作都经过工具名、参数类型和业务规则校验。
+  \item \checkbox 循环至少有五种明确终止原因。
+  \item \checkbox 任意一次失败都能通过结构化轨迹复盘。
+\end{itemize}
+\end{checkpoint}
+

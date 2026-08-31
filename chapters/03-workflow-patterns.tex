@@ -1,0 +1,114 @@
+\chapter{从工作流模式到自主循环}
+
+\begin{takeaway}[学习目标]
+掌握提示链、路由、并行、编排器-执行者、评估器-优化器和自主 Agent 六种模式；能根据任务结构选择模式，并说明为什么不需要更复杂的方案。
+\end{takeaway}
+
+\section{模式是控制流，不是框架名称}
+
+LangGraph、AutoGen、CrewAI 等框架都能表达多种控制流。选框架前应先说清系统采用哪种模式。模式回答“谁决定下一步”，框架回答“用什么代码组织它”。
+
+\section{提示链：把质量关卡插进过程}
+
+提示链把任务拆成固定串行步骤。例如：提取需求、生成大纲、检查覆盖、撰写正文、校验引用。每一步输入输出都可单独观察，失败容易定位。
+
+适合条件：任务可稳定拆分；中间结果有明确 schema；后一步能从更聚焦的输入受益。
+
+\begin{codeblock}
+raw_request
+  -> extract_requirements
+  -> validate_requirements
+  -> draft_outline
+  -> review_outline
+  -> write_document
+\end{codeblock}
+
+不要把本可一次完成的简单任务拆成十次调用。提示链用延迟换控制力，只有关卡确实提升结果时才值得。
+
+\section{路由：让不同问题进入不同路径}
+
+路由先判断输入类别，再选择模型、工具或流程。例如常见问答走廉价模型，退款走受控流程，技术故障进入诊断 Agent。
+
+路由的难点不是分类 prompt，而是未知类别、低置信度和错误路由的恢复。实践中应保留 fallback，并记录每类真实分布。
+
+\section{并行：提速或增加证据独立性}
+
+并行有两种目的：
+
+\begin{itemize}
+  \item \textbf{分区}：将可独立子任务同时执行，例如并行研究五个竞品。
+  \item \textbf{投票}：对同一高风险判断运行多个独立检查，再聚合结果。
+\end{itemize}
+
+只有真正独立的任务才能并行。如果多个 worker 同时依赖尚未确定的共同状态，合并阶段会变成冲突处理器。
+
+\section{编排器-执行者：动态拆分未知任务}
+
+编排器读取目标，动态生成子任务，交给 worker，再合并结果。这适合无法预知子任务数量的场景，如跨文件改代码、深度研究或多来源审计。
+
+\begin{center}
+\begin{tikzpicture}[
+  box/.style={rounded corners,draw=AgentLine,fill=AgentMist,minimum width=27mm,minimum height=10mm,align=center,font=\small\sffamily},
+  flow/.style={-{Stealth[length=2mm]},draw=AgentGreen,line width=0.75pt},
+  node distance=11mm and 9mm
+]
+\node[box] (o) {编排器};
+\node[box,below left=of o] (w1) {Worker A};
+\node[box,below=of o] (w2) {Worker B};
+\node[box,below right=of o] (w3) {Worker C};
+\node[box,below=22mm of o] (s) {聚合与验证};
+\draw[flow] (o) -- (w1);
+\draw[flow] (o) -- (w2);
+\draw[flow] (o) -- (w3);
+\draw[flow] (w1) -- (s);
+\draw[flow] (w2) -- (s);
+\draw[flow] (w3) -- (s);
+\end{tikzpicture}
+\end{center}
+
+编排器必须分配清晰边界、输入、输出格式和预算。否则只是把一个模糊任务复制给多个 Agent，得到几份重复答案。
+
+\section{评估器-优化器：在明确标准下迭代}
+
+一个生成器产出结果，评估器按 rubric 给反馈，生成器据此改进。适合翻译、代码、报告等“反馈能明确改善结果”的任务。
+
+终止条件至少包含：达到阈值、无新增改进、最大轮数、成本上限。否则系统可能不断进行措辞级改写。
+
+\section{自主 Agent：模型动态控制循环}
+
+当步骤无法提前确定、环境反馈丰富、错误可以控制时，可以让模型选择下一步工具。自主不等于无限授权；成熟系统仍有状态机、权限层、预算和人工检查点。
+
+\section{模式组合}
+
+真实系统常是组合：先路由任务，研究类进入编排器-执行者，并行搜索后由评估器检查证据，最后人工确认发布。组合时必须有一个清晰的顶层控制流，避免各组件互相递归委托。
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{>{\bfseries}p{0.19\textwidth} X X}
+\toprule
+模式 & 适合 & 不适合 \\
+\midrule
+提示链 & 固定阶段、可加关卡 & 简单一次性任务 \\
+路由 & 类别差异明显 & 类别模糊且频繁变化 \\
+并行 & 子任务独立或需多证据 & 强共享状态任务 \\
+编排器-执行者 & 动态拆分复杂任务 & 可预先写死的流程 \\
+评估器-优化器 & 标准清晰、反馈有效 & 没有可操作的质量标准 \\
+自主 Agent & 开放步骤、反馈丰富 & 高风险且无法检测错误 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{practice}[把一个“大 Agent”拆成模式]
+选择一个复杂场景，画出顶层控制流。标出每个节点是确定性代码、模型调用、工具、人工确认还是子 Agent。尝试至少删除一个模型节点，用普通代码替代它。
+\end{practice}
+
+\begin{checkpoint}
+\begin{itemize}
+  \item \checkbox 我能先说控制流模式，再说框架名称。
+  \item \checkbox 每个并行子任务都有独立边界和输出格式。
+  \item \checkbox 迭代循环有阈值、轮数和成本停止条件。
+  \item \checkbox 系统中只有必要部分由模型动态控制。
+\end{itemize}
+\end{checkpoint}
+

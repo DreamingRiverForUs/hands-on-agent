@@ -1,0 +1,97 @@
+\chapter{MCP 与 Agent Skills}
+\label{chap:mcp-skills}
+
+\begin{takeaway}[学习目标]
+理解模型上下文协议的角色与边界，能设计 MCP Server 的 tools、resources 与 prompts；理解 Agent Skill 如何把流程知识打包，并知道协议互操作不等于安全可信。
+\end{takeaway}
+
+\section{为什么需要协议层}
+
+没有标准协议时，每个 Agent 客户端都要为每个数据源和工具写专属适配器。MCP 通过标准协议统一能力发现和调用，使宿主应用能连接不同 Server。规范和 SDK 应以官方文档为准\citep{mcp_spec,mcp_python_sdk}。
+
+MCP 解决的是互操作问题：怎样描述能力、建立连接、发送请求和接收结果。它不自动解决业务授权、工具质量、服务器可信度、提示注入或数据合规。
+
+\section{三个核心原语}
+
+\begin{description}[style=nextline,leftmargin=2em]
+  \item[Tools] 由模型或应用调用的动作，可能产生副作用，例如查询订单或创建草稿。
+  \item[Resources] 可读取的上下文数据，例如文件、数据库记录或产品文档。
+  \item[Prompts] 可复用的消息模板或工作入口，由用户或宿主选择使用。
+\end{description}
+
+具体能力与生命周期会随规范演进，实施时锁定协议版本并做兼容测试。不要把社区博客中的旧示例当成当前规范。
+
+\section{Host、Client 与 Server 的责任}
+
+Host 是用户正在使用的 Agent 应用，负责用户体验、权限决策和模型上下文；Client 维护到某个 Server 的协议会话；Server 暴露受控能力。把责任分清很重要：Server 不应假设连接它的模型一定可信，Host 也不应假设 Server 返回内容一定安全。
+
+\section{设计一个业务 MCP Server}
+
+以内容资料库为例，可以暴露：
+
+\begin{itemize}
+  \item Resource：课程索引、来源快照、维护规则。
+  \item Tool：按主题搜索条目、核验 URL、生成待更新清单。
+  \item Prompt：季度资源审计流程、单条资源录入模板。
+\end{itemize}
+
+不要暴露整个文件系统读写。为资源设置 URI 规则与权限，为工具设置窄参数和副作用级别，为每次连接定义租户与用户身份。
+
+\section{传输与部署选择}
+
+本地进程适合个人工具和开发；远程传输适合团队共享服务。远程部署需要认证、TLS、速率限制、审计、租户隔离和密钥轮换。本地也不是天然安全：被连接的 Server 与宿主用户拥有相近的机器访问面，安装前仍应审查来源和代码。
+
+\section{连接第三方 Server 前的检查}
+
+\begin{enumerate}
+  \item 仓库与发布者能否核实？是否有明确许可证和维护记录？
+  \item Server 会访问哪些目录、网络域名、令牌和账户？
+  \item 每个工具有什么副作用，是否支持预览和确认？
+  \item 返回的数据是否可能包含不可信指令？
+  \item 能否在容器、独立账户或只读凭证下运行？
+  \item 如何升级、回滚、撤销凭证和查看审计日志？
+\end{enumerate}
+
+社区 Awesome 列表适合发现候选项，不构成安全背书。安装前必须回到原仓库和当前版本核验。
+
+\section{Agent Skill 是流程知识包}
+
+Skill 通常把一类任务的触发条件、操作步骤、约束、参考资料、脚本和模板组织在一个可移植目录中。与普通 prompt 相比，它更接近“给 Agent 的操作手册”：告诉系统什么时候加载、要读哪些文件、如何验证完成。
+
+一个高质量 Skill 应具备：
+
+\begin{itemize}
+  \item 狭窄、可判断的适用范围；
+  \item 明确输入、产物和完成条件；
+  \item 最小必要的逐步指令，而不是百科全文；
+  \item 可执行脚本、模板和示例资产；
+  \item 权限边界、危险动作与失败恢复；
+  \item 版本、维护者、依赖和测试方法。
+\end{itemize}
+
+Agent Skills 规范与公开示例可以帮助理解目录约定，但具体客户端支持范围应查看当前文档\citep{agent_skills_spec}。
+
+\section{MCP 与 Skills 如何配合}
+
+MCP 更像能力接口，Skill 更像工作方法。一个“发布电子书” Skill 可以指导 Agent 读取书稿、构建、渲染、检查并发布；实际的 GitHub、文件和构建能力可以来自 MCP Server 或宿主原生工具。两者不能互相代替。
+
+\begin{warningbox}
+安装 Skill 等同于引入第三方操作指令，连接 MCP Server 等同于引入第三方可执行能力。两者都应版本锁定、代码审查、最小权限和可撤销；不要从来源不明的网盘批量安装。
+\end{warningbox}
+
+\section{版本化与可测试性}
+
+协议 Server 应有合同测试与兼容矩阵；Skill 应有触发测试、代表任务和产物校验。升级时记录工具 schema、权限和行为变化。若多个客户端共用同一能力，至少测试能力发现、参数验证、错误返回和取消操作。
+
+\begin{practice}[设计一个 MCP + Skill 组合]
+选择一个真实流程。先列出它需要的 Resources、Tools、Prompts，再写一份 Skill 目录草图：触发条件、步骤、引用文件、脚本和验收命令。标出哪些规则必须由 Server 或权限系统强制执行，不能只写在 Skill 里。
+\end{practice}
+
+\begin{checkpoint}
+\begin{itemize}
+  \item \checkbox 我能区分 Host、Client 与 Server 的责任。
+  \item \checkbox 我不会把协议兼容当作安全可信。
+  \item \checkbox Skill 只包含完成任务所需的流程知识和资产。
+  \item \checkbox Server 与 Skill 都有版本、测试、权限和回滚策略。
+\end{itemize}
+\end{checkpoint}

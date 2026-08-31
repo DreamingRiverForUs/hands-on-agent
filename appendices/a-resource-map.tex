@@ -1,0 +1,138 @@
+\chapter{公开学习资源地图}
+\label{app:resources}
+
+本附录只收录公开课程、官方文档、论文和开源仓库入口。\term{公开可访问不等于可以复制再分发}：没有明确许可证的内容只分享原始链接；第三方仓库即使出现在 Awesome 列表中，也必须单独核验当前许可证、维护状态与安全性。
+
+\section{第一梯队：从这里开始}
+
+\begin{longtable}{>{\bfseries}p{0.22\textwidth} p{0.31\textwidth} p{0.37\textwidth}}
+\toprule
+资源 & 入口 & 最适合的学习产物 \\
+\midrule
+Anthropic: Building Effective Agents & \url{https://www.anthropic.com/research/building-effective-agents} & 为一个任务选择最低复杂度模式 \\
+OpenAI: Practical Guide & \url{https://openai.com/business/guides-and-resources/a-practical-guide-to-building-ai-agents/} & Agent 设计与上线检查表 \\
+Microsoft AI Agents for Beginners & \url{https://github.com/microsoft/ai-agents-for-beginners} & 按课程运行 Notebook 和一个项目 \\
+Hugging Face Agents Course & \url{https://huggingface.co/learn/agents-course/} & 完成免费课程与结业任务 \\
+Google/Kaggle Agents Intensive & \url{https://www.kaggle.com/learn-guide/5-day-agents} & 五天笔记、代码和实践作业 \\
+Datawhale Hello Agents & \url{https://github.com/datawhalechina/hello-agents} & 中文系统学习与章节代码 \\
+MCP 官方文档 & \url{https://modelcontextprotocol.io/} & 实现最小 Client 与 Server \\
+OWASP GenAI Security & \url{https://genai.owasp.org/} & 为自己的 Agent 画威胁模型 \\
+\bottomrule
+\end{longtable}
+
+\section{基础、Prompt 与 Context}
+
+\begin{itemize}
+  \item \textbf{DeepLearning.AI 短课}：\url{https://www.deeplearning.ai/short-courses/}，选择一门与当前项目直接相关的课程。
+  \item \textbf{Prompt Engineering Guide}：\url{https://www.promptingguide.ai/}，用于系统查阅方法与论文，而非背模板。
+  \item \textbf{OpenAI Cookbook}：\url{https://github.com/openai/openai-cookbook}，结构化输出、工具、评测和应用示例。
+  \item \textbf{Claude Cookbooks}：\url{https://github.com/anthropics/claude-cookbooks}，工具、RAG 与多模态 recipes。
+  \item \textbf{Gemini Cookbook}：\url{https://github.com/google-gemini/cookbook}，Gemini API 和长上下文示例。
+  \item \textbf{Full Stack Deep Learning}：\url{https://fullstackdeeplearning.com/}，LLM 产品和生产系统课程。
+\end{itemize}
+
+\section{框架与 SDK 选择表}
+
+\begin{longtable}{>{\bfseries}p{0.2\textwidth} p{0.33\textwidth} p{0.37\textwidth}}
+\toprule
+项目 & 原始入口 & 先验证什么 \\
+\midrule
+LangGraph & \url{https://github.com/langchain-ai/langgraph} & 状态图、持久化、恢复和人工检查点 \\
+OpenAI Agents SDK & \url{https://github.com/openai/openai-agents-python} & tools、handoff、guardrails、tracing \\
+smolagents & \url{https://github.com/huggingface/smolagents} & 教学友好度与 code agent 风险 \\
+AutoGen & \url{https://github.com/microsoft/autogen} & 当前 API、事件驱动和多 Agent \\
+CrewAI & \url{https://github.com/crewAIInc/crewAI} & 角色/任务抽象是否真的降低复杂度 \\
+LlamaIndex & \url{https://github.com/run-llama/llama_index} & 数据连接、检索和 agentic RAG \\
+Semantic Kernel & \url{https://github.com/microsoft/semantic-kernel} & 企业技术栈、插件和流程集成 \\
+Haystack & \url{https://github.com/deepset-ai/haystack} & 显式 pipeline、RAG 与生产部署 \\
+AgentScope & \url{https://github.com/agentscope-ai/agentscope} & 多 Agent 控制、可观测与中文生态 \\
+\bottomrule
+\end{longtable}
+
+框架 Star 数、许可与 API 会变化，本表不写静态排行榜。选型时在同一 20 条评测集上比较完成率、代码量、trace、恢复、延迟和迁移成本。
+
+\section{MCP、Skills 与工具生态}
+
+\begin{itemize}
+  \item MCP Python SDK：\url{https://github.com/modelcontextprotocol/python-sdk}
+  \item MCP TypeScript SDK：\url{https://github.com/modelcontextprotocol/typescript-sdk}
+  \item MCP Reference Servers：\url{https://github.com/modelcontextprotocol/servers}
+  \item Awesome MCP Servers：\url{https://github.com/punkpeye/awesome-mcp-servers}
+  \item Agent Skills Specification：\url{https://agentskills.io/}
+  \item Anthropic Skills：\url{https://github.com/anthropics/skills}
+  \item OpenAI Skills Catalog：\url{https://github.com/openai/skills}
+  \item Vercel Skills CLI：\url{https://github.com/vercel-labs/skills}
+\end{itemize}
+
+安装前执行第~\ref{chap:mcp-skills}~章的来源、权限、版本和沙箱检查。资源列表只负责发现，不负责背书。
+
+\section{可运行案例与产品}
+
+\begin{itemize}
+  \item Awesome LLM Apps：\url{https://github.com/Shubhamsaboo/awesome-llm-apps}
+  \item GenAI Agents：\url{https://github.com/NirDiamant/GenAI_Agents}
+  \item OpenHands：\url{https://github.com/OpenHands/OpenHands}
+  \item browser-use：\url{https://github.com/browser-use/browser-use}
+  \item Mem0：\url{https://github.com/mem0ai/mem0}
+  \item Dify：\url{https://github.com/langgenius/dify}
+  \item Langflow：\url{https://github.com/langflow-ai/langflow}
+  \item Ollama：\url{https://github.com/ollama/ollama}
+\end{itemize}
+
+阅读案例时不要只运行 Demo。画出它的控制流、工具权限、状态存储、评测方法和失败恢复，再判断哪些设计能迁移到自己的任务。
+
+\section{评测、追踪与安全工具}
+
+\begin{itemize}
+  \item Promptfoo：\url{https://github.com/promptfoo/promptfoo}
+  \item DeepEval：\url{https://github.com/confident-ai/deepeval}
+  \item RAGAS：\url{https://github.com/explodinggradients/ragas}
+  \item Phoenix：\url{https://github.com/Arize-ai/phoenix}
+  \item Langfuse：\url{https://github.com/langfuse/langfuse}
+  \item Opik：\url{https://github.com/comet-ml/opik}
+  \item garak：\url{https://github.com/NVIDIA/garak}
+\end{itemize}
+
+工具无法替代评测设计。先定义任务、环境、断言与数据生命周期，再选择能实现它的产品。
+
+\section{公开视频入口}
+
+\begin{itemize}
+  \item Microsoft Developer Agents 课程：\url{https://www.youtube.com/watch?v=OhI005_aJkA}
+  \item Full Stack Deep Learning：\url{https://www.youtube.com/@The_Full_Stack}
+  \item DeepLearning.AI：\url{https://www.youtube.com/@Deeplearningai}
+  \item Hugging Face：\url{https://www.youtube.com/@HuggingFace}
+  \item LangChain：\url{https://www.youtube.com/@LangChain}
+  \item Google for Developers：\url{https://www.youtube.com/@GoogleDevelopers}
+\end{itemize}
+
+视频只分享原始观看入口，不下载重传。看完一段内容，必须留下代码、评测、笔记或架构图之一。
+
+\section{持续更新的十个上游资料源}
+
+本书维护过程中把下列 Awesome 仓库作为\term{发现源}。它们的内容不会自动复制进书稿；每个候选资源仍需回到原始页面核验。
+
+\begin{longtable}{>{\bfseries}p{0.31\textwidth} p{0.59\textwidth}}
+\toprule
+上游 & 地址 \\
+\midrule
+Awesome LLM & \url{https://github.com/Hannibal046/Awesome-LLM} \\
+Awesome LLMOps & \url{https://github.com/tensorchord/Awesome-LLMOps} \\
+Awesome LLM Resources & \url{https://github.com/WangRongsheng/awesome-LLM-resources} \\
+Agentic AI 中文导航 & \url{https://github.com/WenyuChiou/awesome-agentic-ai-zh} \\
+Agentic Patterns & \url{https://github.com/nibzard/awesome-agentic-patterns} \\
+Awesome AI Agents & \url{https://github.com/e2b-dev/awesome-ai-agents} \\
+Awesome Generative AI & \url{https://github.com/steven2358/awesome-generative-ai} \\
+Generative AI Guide & \url{https://github.com/aishwaryanr/awesome-generative-ai-guide} \\
+Awesome LLM Apps & \url{https://github.com/Shubhamsaboo/awesome-llm-apps} \\
+Awesome MCP Servers & \url{https://github.com/punkpeye/awesome-mcp-servers} \\
+\bottomrule
+\end{longtable}
+
+\section{季度维护协议}
+
+每季度执行：拉取上游更新；检查死链和重定向；核对官方入口、许可证与归档状态；记录重大 API 迁移；用新增资源解决具体学习缺口；更新访问日期和版本；在 changelog 说明新增、移除及原因。
+
+\begin{warningbox}
+本资料库不收录来源不明的网盘资源、盗版电子书、破解软件或被搬运的付费课程。所谓“全网资料包”最容易积累版权、恶意文件和过期资料风险；长期价值来自原创导读、核验和实践路径。
+\end{warningbox}
