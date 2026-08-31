@@ -21,13 +21,19 @@
 
 ## 构建
 
-依赖：XeLaTeX、latexmk、BibTeX。渲染检查额外需要 Poppler 的 `pdftoppm` 和 `pdfinfo`。
+推荐安装 Tectonic；构建脚本会用它自动下载所需 TeX 包并完成参考文献与目录编译。若未安装 Tectonic，则回退到 XeLaTeX、latexmk 与 BibTeX。渲染检查需要 Poppler 的 `pdftoppm`，中文字体映射不可用时会自动回退 Ghostscript；元数据检查使用 `pdfinfo`。
 
 ```bash
 make build
 ```
 
 输出：`output/pdf/hands-on-agent.pdf`
+
+macOS 可通过 Homebrew 安装推荐工具：
+
+```bash
+brew install tectonic poppler ghostscript
+```
 
 渲染全部页面为 PNG：
 
@@ -69,4 +75,3 @@ hands-on-agent/
 ## 维护
 
 本书由 `DreamingRiverForUs` 维护。路线图和待写内容使用 GitHub Issues 管理；稳定里程碑以 GitHub Releases 发布 PDF。
-

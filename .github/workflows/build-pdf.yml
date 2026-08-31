@@ -25,7 +25,7 @@ jobs:
           cp build/book.pdf output/pdf/hands-on-agent.pdf
 
       - name: Upload PDF
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: hands-on-agent-pdf
           path: output/pdf/hands-on-agent.pdf
